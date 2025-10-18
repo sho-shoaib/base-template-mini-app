@@ -50,7 +50,7 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: black;
   font-family: "Inter", Helvetica, Arial, sans-serif;
 }
 
