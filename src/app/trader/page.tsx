@@ -58,8 +58,9 @@ export default function TraderSignup() {
 
       // Redirect
       handleDone(normalized);
-    } catch (e: any) {
-      setError(e?.message || "Sign up failed.");
+    } catch (e) {
+      const err = e as Error;
+      setError(err?.message || "Sign up failed.");
     } finally {
       setLoading(null);
     }
@@ -88,8 +89,9 @@ export default function TraderSignup() {
 
       // Redirect
       handleDone(normalized);
-    } catch (e: any) {
-      setError(e?.message || "Login failed.");
+    } catch (e) {
+      const err = e as Error;
+      setError(err?.message || "Login failed.");
     } finally {
       setLoading(null);
     }

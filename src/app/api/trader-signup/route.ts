@@ -1,6 +1,6 @@
 // app/api/trader-signin/hyperliquid/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 // Optional CORS: set NEXT_PUBLIC_DASHBOARD_ORIGIN to your frontend origin
 const CORS_ORIGIN = process.env.NEXT_PUBLIC_DASHBOARD_ORIGIN?.trim();
@@ -43,7 +43,7 @@ const MOCK_TRADER_DATA = {
   updatedAt: "2025-10-18T09:55:39.263Z",
 };
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return withCors(
     NextResponse.json({
       success: true,
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   );
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   return withCors(
     NextResponse.json({
       success: true,

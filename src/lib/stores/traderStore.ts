@@ -15,11 +15,11 @@ export type ScoreBreakdown = {
 
 export type Metrics = {
   totalTrades: number;
-  totalVolume: number; // numbers in store (we coerce from API)
+  totalVolume: number;
   accountAgeYears: number;
-  winRate: number; // percentage (0..100)
+  winRate: number;
   totalPnL: number;
-  roi: number; // percentage (e.g. 12.34)
+  roi: number;
   winningTrades: number;
   losingTrades: number;
 };
@@ -33,6 +33,46 @@ export type Trader = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+interface ApiScoreBreakdown {
+  accountAge?: number;
+  tradingVolume?: number;
+  winRate?: number;
+  tradeCount?: number;
+  profitability?: number;
+  total?: number;
+}
+
+interface ApiMetrics {
+  totalTrades?: number;
+  totalVolume?: number;
+  accountAgeYears?: number;
+  winRate?: number;
+  totalPnL?: number;
+  roi?: number;
+  winningTrades?: number;
+  losingTrades?: number;
+}
+
+interface ApiResponse {
+  success?: boolean;
+  data?: {
+    address?: string;
+    platform?: string;
+    trustScore?: string | number;
+    scoreBreakdown?: ApiScoreBreakdown;
+    metrics?: ApiMetrics;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  address?: string;
+  platform?: string;
+  trustScore?: string | number;
+  scoreBreakdown?: ApiScoreBreakdown;
+  metrics?: ApiMetrics;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 type TraderState = {
   trader: Trader | null;
@@ -50,7 +90,7 @@ type TraderState = {
    * Accepts your API response and normalizes into the store shape.
    * Works with both /trader-login/hyperliquid and /trader-signup responses.
    */
-  setFromApi: (apiJson: any) => void;
+  setFromApi: (apiJson: ApiResponse) => void;
 };
 
 /** Safely coerce numeric strings from API into numbers */
@@ -67,7 +107,7 @@ const storage =
 
 export const useTraderStore = create<TraderState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       trader: null,
 
       setTrader: (t) => set({ trader: t }),
@@ -88,27 +128,27 @@ export const useTraderStore = create<TraderState>()(
 
         const normalized: Trader = {
           address: String(data.address).toLowerCase(),
-          platform: data.platform ?? "hyperliquid",
+          platform: (data.platform ?? "hyperliquid") as "hyperliquid",
           trustScore: toNum(data.trustScore),
 
           scoreBreakdown: {
-            accountAge: toNum(data.scoreBreakdown?.accountAge),
-            tradingVolume: toNum(data.scoreBreakdown?.tradingVolume),
-            winRate: toNum(data.scoreBreakdown?.winRate),
-            tradeCount: toNum(data.scoreBreakdown?.tradeCount),
-            profitability: toNum(data.scoreBreakdown?.profitability),
-            total: toNum(data.scoreBreakdown?.total),
+            accountAge: toNum(data.scoreBreakdown?.accountAge ?? 0),
+            tradingVolume: toNum(data.scoreBreakdown?.tradingVolume ?? 0),
+            winRate: toNum(data.scoreBreakdown?.winRate ?? 0),
+            tradeCount: toNum(data.scoreBreakdown?.tradeCount ?? 0),
+            profitability: toNum(data.scoreBreakdown?.profitability ?? 0),
+            total: toNum(data.scoreBreakdown?.total ?? 0),
           },
 
           metrics: {
-            totalTrades: toNum(data.metrics?.totalTrades),
-            totalVolume: toNum(data.metrics?.totalVolume),
-            accountAgeYears: toNum(data.metrics?.accountAgeYears),
-            winRate: toNum(data.metrics?.winRate),
-            totalPnL: toNum(data.metrics?.totalPnL),
-            roi: toNum(data.metrics?.roi),
-            winningTrades: toNum(data.metrics?.winningTrades),
-            losingTrades: toNum(data.metrics?.losingTrades),
+            totalTrades: toNum(data.metrics?.totalTrades ?? 0),
+            totalVolume: toNum(data.metrics?.totalVolume ?? 0),
+            accountAgeYears: toNum(data.metrics?.accountAgeYears ?? 0),
+            winRate: toNum(data.metrics?.winRate ?? 0),
+            totalPnL: toNum(data.metrics?.totalPnL ?? 0),
+            roi: toNum(data.metrics?.roi ?? 0),
+            winningTrades: toNum(data.metrics?.winningTrades ?? 0),
+            losingTrades: toNum(data.metrics?.losingTrades ?? 0),
           },
 
           createdAt: data.createdAt,

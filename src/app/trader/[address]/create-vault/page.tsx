@@ -52,8 +52,9 @@ export default function CreateVaultPage() {
       // Optionally: store the created vault in a Zustand vault store later
       // For now, redirect back to trader page
       router.push(`/trader/${traderAddress}`);
-    } catch (e: any) {
-      setError(e?.message || "Failed to create vault.");
+    } catch (e) {
+      const err = e as Error;
+      setError(err?.message || "Failed to create vault.");
     } finally {
       setSubmitting(false);
     }

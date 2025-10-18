@@ -58,13 +58,14 @@ export async function POST(req: NextRequest) {
       data: { _id: result.insertedId.toString(), ...doc },
       timestamp: now.toISOString(),
     });
-  } catch (err: any) {
-    console.error("Full error:", err);
+  } catch (err) {
+    const error = err as Error & { stack?: string };
+    console.error("Full error:", error);
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: String(err?.message ?? err),
-        stack: err?.stack,
+        details: error?.message ?? String(err),
+        stack: error?.stack,
       },
       { status: 500 }
     );

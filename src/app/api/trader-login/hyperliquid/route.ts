@@ -14,6 +14,14 @@ interface TrustScoreBreakdown {
   total: number;
 }
 
+interface HyperliquidFill {
+  time: string | number;
+  px: string | number;
+  sz: string | number;
+  closedPnl?: string | number;
+  [key: string]: unknown;
+}
+
 // --- scoring (unchanged) ---
 function scoreAccountAge(years: number): number {
   if (years < 0.5) return 5;
@@ -102,7 +110,7 @@ export async function POST(request: NextRequest) {
       user: address,
     });
 
-    const fills: any[] = fillsResponse.data || [];
+    const fills: HyperliquidFill[] = fillsResponse.data || [];
     console.log(`Total fills: ${fills.length}`);
 
     if (fills.length === 0) {
@@ -124,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Metrics
     const totalTrades = fills.length;
 
-    const totalVolume = fills.reduce((sum: number, fill: any) => {
+    const totalVolume = fills.reduce((sum: number, fill: HyperliquidFill) => {
       const px = Number(fill.px);
       const sz = Math.abs(Number(fill.sz));
       if (!Number.isFinite(px) || !Number.isFinite(sz)) return sum;
@@ -136,15 +144,15 @@ export async function POST(request: NextRequest) {
     const accountAgeYears = accountAgeMs / (1000 * 60 * 60 * 24 * 365);
 
     const closedTrades = fills.filter(
-      (f: any) => Number(f.closedPnl ?? 0) !== 0
+      (f: HyperliquidFill) => Number(f.closedPnl ?? 0) !== 0
     );
     const winningTrades = closedTrades.filter(
-      (f: any) => Number(f.closedPnl ?? 0) > 0
+      (f: HyperliquidFill) => Number(f.closedPnl ?? 0) > 0
     );
     const winRate =
       closedTrades.length > 0 ? winningTrades.length / closedTrades.length : 0;
 
-    const totalPnL = fills.reduce((sum: number, fill: any) => {
+    const totalPnL = fills.reduce((sum: number, fill: HyperliquidFill) => {
       const pnl = Number(fill.closedPnl ?? 0);
       if (!Number.isFinite(pnl)) return sum;
       return sum + pnl;
@@ -231,10 +239,11 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
       },
     });
-  } catch (error: any) {
-    console.error("Error:", error?.message || error);
-    if (error?.response) {
-      console.error("API Response:", error.response.data);
+  } catch (error) {
+    const err = error as Error & { response?: { data: unknown } };
+    console.error("Error:", err?.message || error);
+    if (err?.response) {
+      console.error("API Response:", err.response.data);
       return NextResponse.json(
         { error: "Failed to fetch data from Hyperliquid API" },
         { status: 500 }
@@ -243,7 +252,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: String(error?.message ?? error),
+        details: err?.message ?? String(error),
       },
       { status: 500 }
     );
